@@ -1,97 +1,157 @@
-This is a new [**React Native**](https://reactnative.dev) project, bootstrapped using [`@react-native-community/cli`](https://github.com/react-native-community/cli).
+#  SpamApp
 
-# Getting Started
+A mobile application built with **React Native (TypeScript)** for detecting and handling spam messages , Spam Linksand Fraud Payments. This app integrates **4 AI-powered models** deployed on **Microsoft Azure** for enhanced spam detection, classification, and response handling.
 
-> **Note**: Make sure you have completed the [Set Up Your Environment](https://reactnative.dev/docs/set-up-your-environment) guide before proceeding.
+---
 
-## Step 1: Start Metro
+##  Features
 
-First, you will need to run **Metro**, the JavaScript build tool for React Native.
+-  Detect spam messages in real-time.
+-  Scan and classify messages using AI.
+-  Block spam numbers or alert the user.
+-  Backend AI model APIs hosted on Microsoft Azure.
+-  4 integrated AI models:
+  1. Spam classification
+  2. Link phishing detection
+  3. Fraud Payment detection
 
-To start the Metro dev server, run the following command from the root of your React Native project:
+---
 
-```sh
-# Using npm
-npm start
+##  Tech Stack
 
-# OR using Yarn
-yarn start
+| Layer            | Tech                      |
+|------------------|---------------------------|
+| Frontend         | React Native, TypeScript  |
+| Backend APIs     | Python-based AI Models (hosted on Azure) |
+| State Management | React Context API         |
+| Styling          | Native components         |
+| Build Tool       | Metro bundler             |
+| Testing          | Jest                      |
+
+---
+
+##  Project Structure
+
+```
+SPAMAPP/
+├── android/            # Android native code
+├── ios/                # iOS native code
+├── src/
+│   ├── assets/         # Fonts, images, etc.
+│   ├── components/     # Reusable UI components
+│   ├── context/        # Global state management
+│   ├── screens/        # Application screens
+│   ├── services/       # API service logic
+│   ├── utils/          # Helper functions
+│   └── types/          # TypeScript types/interfaces
+├── __tests__/          # Unit tests
+├── App.tsx             # Main App entry point
+├── index.js            # App bootstrap
 ```
 
-## Step 2: Build and run your app
+---
 
-With Metro running, open a new terminal window/pane from the root of your React Native project, and use one of the following commands to build and run your Android or iOS app:
+##  Setup & Installation
 
-### Android
+### 1. Prerequisites
 
-```sh
-# Using npm
-npm run android
+- Node.js >= 16.x
+- Yarn or npm
+- Android Studio / Xcode
+- React Native CLI
+- Azure APIs setup and accessible
 
-# OR using Yarn
-yarn android
+### 2. Clone Repository
+
+```bash
+git clone https://github.com/a-sksingh113/Spam-_Detector_App.git
+cd spamapp
 ```
 
-### iOS
+### 3. Install Dependencies
 
-For iOS, remember to install CocoaPods dependencies (this only needs to be run on first clone or after updating native deps).
-
-The first time you create a new project, run the Ruby bundler to install CocoaPods itself:
-
-```sh
-bundle install
+```bash
+npm install
+# or
+yarn install
 ```
 
-Then, and every time you update your native dependencies, run:
+### 4. Configure `.env` File
 
-```sh
-bundle exec pod install
+Create a `.env` file at the root with your Azure API endpoints:
+
+```env
+SPAM_CLASSIFIER_API=your deployed api
+Spam_Links_DETECTOR_API=your deployed api
+Banksim_Dataset_Model=your deployed api
+Ulb_Dataset_Model=your deployed api
 ```
 
-For more information, please visit [CocoaPods Getting Started guide](https://guides.cocoapods.org/using/getting-started.html).
+### 5. Run the App
 
-```sh
-# Using npm
-npm run ios
+```bash
+# Android
+npx react-native run-android
 
-# OR using Yarn
-yarn ios
+# iOS
+npx react-native run-ios
 ```
 
-If everything is set up correctly, you should see your new app running in the Android Emulator, iOS Simulator, or your connected device.
+---
 
-This is one way to run your app — you can also build it directly from Android Studio or Xcode.
+##  Azure AI Model APIs
 
-## Step 3: Modify your app
+| Model                |                             | Function |
+|---------------------|---------------------------------------------|----------|
+| Spam Classifier     |                         | Classify message as spam/ham |
+| Phishing Detector   |                         | Classify Spam Links|
+| Fraud_Payment_Detection_from _Banksim_dataset |                    | Detect Fraudulent transactions from Banksim dataset |
+| Fraud_Payment_Detection_from_Ulb_Dataset |                       | Detect Fraudulent transactions from Ulb dataset |
 
-Now that you have successfully run the app, let's make changes!
+Each API receives a `POST` request with message content and returns a prediction with confidence.
 
-Open `App.tsx` in your text editor of choice and make some changes. When you save, your app will automatically update and reflect these changes — this is powered by [Fast Refresh](https://reactnative.dev/docs/fast-refresh).
+---
 
-When you want to forcefully reload, for example to reset the state of your app, you can perform a full reload:
+##  Running Tests
 
-- **Android**: Press the <kbd>R</kbd> key twice or select **"Reload"** from the **Dev Menu**, accessed via <kbd>Ctrl</kbd> + <kbd>M</kbd> (Windows/Linux) or <kbd>Cmd ⌘</kbd> + <kbd>M</kbd> (macOS).
-- **iOS**: Press <kbd>R</kbd> in iOS Simulator.
+```bash
+npm test
+# or
+yarn test
+```
 
-## Congratulations! :tada:
+---
 
-You've successfully run and modified your React Native App. :partying_face:
+##  Build & Release
 
-### Now what?
+```bash
+# Android
+cd android
+./gradlew assembleRelease
 
-- If you want to add this new React Native code to an existing application, check out the [Integration guide](https://reactnative.dev/docs/integration-with-existing-apps).
-- If you're curious to learn more about React Native, check out the [docs](https://reactnative.dev/docs/getting-started).
+# iOS
+npx react-native run-ios --configuration Release
+```
 
-# Troubleshooting
+---
 
-If you're having issues getting the above steps to work, see the [Troubleshooting](https://reactnative.dev/docs/troubleshooting) page.
+##  Tools & Configs
 
-# Learn More
+- `babel.config.js` – Babel setup for React Native
+- `.eslintrc.js` – Linting rules
+- `.prettierrc.js` – Prettier formatting
+- `tsconfig.json` – TypeScript settings
+- `metro.config.js` – Custom bundler config
 
-To learn more about React Native, take a look at the following resources:
+---
 
-- [React Native Website](https://reactnative.dev) - learn more about React Native.
-- [Getting Started](https://reactnative.dev/docs/environment-setup) - an **overview** of React Native and how setup your environment.
-- [Learn the Basics](https://reactnative.dev/docs/getting-started) - a **guided tour** of the React Native **basics**.
-- [Blog](https://reactnative.dev/blog) - read the latest official React Native **Blog** posts.
-- [`@facebook/react-native`](https://github.com/facebook/react-native) - the Open Source; GitHub **repository** for React Native.
+##  Author
+
+**Satish Kumar Singh**  
+[LinkedIn](https://www.linkedin.com/in/satish-singh-8b1786273) | [GitHub](https://github.com/a-sksingh113)
+
+---
+
+##  License
+
+This project is licensed under the MIT License.
