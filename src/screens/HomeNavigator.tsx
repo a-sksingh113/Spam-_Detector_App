@@ -6,7 +6,7 @@ import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 
 import HomeScreen from './HomeScreen';
-import CheckMessageScreen from './CheckMessageScreen';
+import ChatbotScreen from './ChatbotScreen';
 import ProfileScreen from './ProfileScreen';
 
 import AboutSpamScreen from './AboutSpamScreen';
@@ -27,7 +27,7 @@ const Stack = createNativeStackNavigator();
 
 const iconMap: Record<string, string> = {
   Home: 'home',
-  CheckMessage: 'report',      
+  Chatbot: 'chat',      
   Profile: 'person',
    History: 'history',
 };
@@ -45,7 +45,7 @@ const BottomTabs = () => (
     })}
   >
     <Tab.Screen name="Home" component={HomeScreen} />
-    <Tab.Screen name="CheckMessage" component={CheckMessageScreen} />
+    <Tab.Screen name="Chatbot" component={ChatbotScreen} />
     
 <Tab.Screen name="PaymentHistory" component={PaymentHistory} />
     <Tab.Screen name="Profile" component={ProfileScreen} />

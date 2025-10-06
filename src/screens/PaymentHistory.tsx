@@ -215,7 +215,7 @@ const PaymentHistory = () => {
 
   return (
     <SafeAreaView style={styles.container}>
-      <StatusBar barStyle="light-content" backgroundColor="#667eea" />
+      <StatusBar barStyle="dark-content" backgroundColor="#667eea" />
       
       {/* Header */}
       <View style={styles.header}>
@@ -294,6 +294,7 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#f8fafc',
+    marginTop: Platform.OS === 'android' ? 25 : 0,
   },
   header: {
     flexDirection: 'row',
