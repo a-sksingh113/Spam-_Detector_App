@@ -2,18 +2,19 @@ import React, { useState } from 'react';
 import {
   View,
   Text,
-  TextInput,
   TouchableOpacity,
   StyleSheet,
   Image,
   Alert,
   StatusBar,
+  ScrollView,
 } from 'react-native';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { RootStackParamList } from '../../App';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { ActivityIndicator } from 'react-native';
+import ScrambledKeypad from '../components/ScrambledKeypad';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'OTP'>;
 
@@ -84,15 +85,44 @@ const [verifying, setVerifying] = useState(false);
           style={styles.image}
         />
         <Text style={styles.subheader}>OTP sent to {phone}</Text>
-        <TextInput
-          style={styles.input}
-          placeholder="Enter OTP"
-           placeholderTextColor="#999"
-          keyboardType="number-pad"
-          value={otp}
-          onChangeText={setOtp}
+        
+        {/* OTP Display */}
+        <View style={styles.otpContainer}>
+          <Text style={styles.otpLabel}>Enter 6-digit OTP</Text>
+          <View style={styles.otpDotsContainer}>
+            {Array.from({ length: 6 }, (_, index) => (
+              <View
+                key={index}
+                style={[
+                  styles.otpDot,
+                  index < otp.length && styles.otpDotFilled,
+                ]}
+              />
+            ))}
+          </View>
+        </View>
+
+        {/* Scrambled Keypad */}
+        <ScrambledKeypad
+          onKeyPress={(key) => {
+            if (otp.length < 6) {
+              setOtp(prev => prev + key);
+            }
+          }}
+          onBackspace={() => {
+            setOtp(prev => prev.slice(0, -1));
+          }}
+          onClear={() => setOtp('')}
+          showClearButton={true}
           maxLength={6}
+          currentValue={otp}
+          buttonColor="#fff"
+          textColor="#2d3748"
+          backgroundColor="#f7fafc"
+          borderColor="#e2e8f0"
+          enableVibration={false}
         />
+
        <TouchableOpacity
   style={[styles.button, otp.length < 6 && styles.disabled]}
   onPress={handleVerify}
@@ -113,7 +143,7 @@ const [verifying, setVerifying] = useState(false);
 const styles = StyleSheet.create({
   disabled: { opacity: 0.6 },
   Otpsafe: { flex: 1, backgroundColor: '#fff' },
-  container: { flex: 1, backgroundColor: '#fff' },
+  container: { flex: 1, backgroundColor: '#fff', paddingBottom: 20 },
   header: {
     marginTop: 60,
     textAlign: 'center',
@@ -127,13 +157,34 @@ const styles = StyleSheet.create({
     marginVertical: 10,
   },
   image: { width: 180, height: 180, alignSelf: 'center', marginVertical: 20 },
-  input: {
-    marginHorizontal: 20,
-    borderWidth: 1,
-    borderColor: '#ccc',
-    borderRadius: 8,
-    padding: 10,
-    textAlign: 'center',
+  otpContainer: {
+    alignItems: 'center',
+    marginVertical: 20,
+    paddingHorizontal: 20,
+  },
+  otpLabel: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: '#4a5568',
+    marginBottom: 20,
+  },
+  otpDotsContainer: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    gap: 12,
+    marginBottom: 10,
+  },
+  otpDot: {
+    width: 14,
+    height: 14,
+    borderRadius: 7,
+    borderWidth: 2,
+    borderColor: '#cbd5e0',
+    backgroundColor: 'transparent',
+  },
+  otpDotFilled: {
+    backgroundColor: '#003366',
+    borderColor: '#003366',
   },
   button: {
     backgroundColor: '#003366',

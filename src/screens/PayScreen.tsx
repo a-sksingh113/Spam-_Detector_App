@@ -10,10 +10,12 @@ import {
   StatusBar,
   Modal,
   ActivityIndicator,
+  ScrollView,
 } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Picker } from '@react-native-picker/picker';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import ScrambledKeypad from '../components/ScrambledKeypad';
 
 const genderMap: { [key: string]: number } = { female: 1, male: 2, Other: 3 };
 
@@ -336,10 +338,10 @@ const PayScreen = () => {
         </TouchableOpacity>
       </View>
 
-      {/*  Move the PIN Modal here so it's rendered */}
+      {/*  PIN Modal with Scrambled Keypad */}
       <Modal visible={showPinModal} transparent animationType="slide">
         <View style={styles.modalOverlay}>
-          <View style={styles.modalBox}>
+          <View style={styles.modalBoxLarge}>
             {/*  Close Button */}
             <TouchableOpacity
               style={styles.closeButton}
@@ -353,19 +355,45 @@ const PayScreen = () => {
 
             <Text style={styles.title}>Enter Your PIN</Text>
 
-            <TextInput
-              style={[styles.input, { textAlign: 'center' }]}
-              value={enteredPin}
-              onChangeText={setEnteredPin}
-              placeholder="Enter PIN"
-               placeholderTextColor="#999"
-              keyboardType="numeric"
-              secureTextEntry
-              autoFocus
+            {/* PIN Display */}
+            <View style={styles.pinContainer}>
+              <Text style={styles.pinLabel}>Enter your 4-digit PIN to confirm payment</Text>
+              <View style={styles.pinDotsContainer}>
+                {Array.from({ length: 4 }, (_, index) => (
+                  <View
+                    key={index}
+                    style={[
+                      styles.pinDot,
+                      index < enteredPin.length && styles.pinDotFilled,
+                    ]}
+                  />
+                ))}
+              </View>
+            </View>
+
+            {/* Scrambled Keypad */}
+            <ScrambledKeypad
+              onKeyPress={(key) => {
+                if (enteredPin.length < 4) {
+                  setEnteredPin(prev => prev + key);
+                }
+              }}
+              onBackspace={() => {
+                setEnteredPin(prev => prev.slice(0, -1));
+              }}
+              onClear={() => setEnteredPin('')}
+              showClearButton={true}
+              maxLength={4}
+              currentValue={enteredPin}
+              buttonColor="#fff"
+              textColor="#2d3748"
+              backgroundColor="#f7fafc"
+              borderColor="#e2e8f0"
+              enableVibration={false}
             />
 
             <TouchableOpacity
-              style={styles.button}
+              style={[styles.button, enteredPin.length !== 4 && styles.disabled]}
               onPress={() => {
                 if (enteredPin === storedPin) {
                   setEnteredPin('');
@@ -379,6 +407,7 @@ const PayScreen = () => {
                   setEnteredPin('');
                 }
               }}
+              disabled={enteredPin.length !== 4}
             >
               <Text style={styles.buttonText}>Confirm</Text>
             </TouchableOpacity>
@@ -543,15 +572,15 @@ const styles = StyleSheet.create({
     marginTop: 5,
   },
   button: {
-    backgroundColor: '#2196F3',
-    width: 90,
+    backgroundColor: '#000203ff',
+    width: 100,
     paddingVertical: 14,
     borderRadius: 50,
     marginTop: 20,
     alignItems: 'center',
   },
   buttonText: {
-    color: '#fff',
+    color: '#fefefeff',
     fontSize: 16,
   },
   modalOverlay: {
@@ -566,6 +595,48 @@ const styles = StyleSheet.create({
     backgroundColor: '#fff',
     borderRadius: 10,
     alignItems: 'center',
+  },
+  modalBoxLarge: {
+    width: '90%',
+    maxWidth: 400,
+    padding: 20,
+    backgroundColor: '#fff',
+    borderRadius: 16,
+    alignItems: 'center',
+    maxHeight: '80%',
+  },
+  pinContainer: {
+    alignItems: 'center',
+    marginVertical: 15,
+    paddingHorizontal: 20,
+  },
+  pinLabel: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: '#4a5568',
+    marginBottom: 15,
+    textAlign: 'center',
+  },
+  pinDotsContainer: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    gap: 10,
+    marginBottom: 10,
+  },
+  pinDot: {
+    width: 12,
+    height: 12,
+    borderRadius: 6,
+    borderWidth: 2,
+    borderColor: '#cbd5e0',
+    backgroundColor: 'transparent',
+  },
+  pinDotFilled: {
+    backgroundColor: '#2196F3',
+    borderColor: '#2196F3',
+  },
+  disabled: {
+    opacity: 0.6,
   },
   loadingText: {
     marginTop: 15,

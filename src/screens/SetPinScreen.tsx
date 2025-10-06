@@ -2,17 +2,18 @@ import React, { useState, useEffect } from 'react';
 import {
   View,
   Text,
-  TextInput,
   TouchableOpacity,
   StyleSheet,
   Image,
   Alert,
-  StatusBar
+  StatusBar,
+  ScrollView
 } from 'react-native';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { RootStackParamList } from '../../App';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import ScrambledKeypad from '../components/ScrambledKeypad';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'SetPin'>;
 
@@ -20,6 +21,7 @@ const SetPinScreen: React.FC<Props> = ({ navigation }) => {
   const [pin, setPin] = useState('');
   const [confirm, setConfirm] = useState('');
   const [userId, setUserId] = useState<string | null>(null);
+  const [isConfirmMode, setIsConfirmMode] = useState(false);
 
   useEffect(() => {
     // Get the userId from AsyncStorage
@@ -56,43 +58,103 @@ const SetPinScreen: React.FC<Props> = ({ navigation }) => {
             backgroundColor="#003366"
             translucent={false}
           />
-    <View style={styles.container}>
-      <Text style={styles.header}>Create PIN for SpamWatch</Text>
+    <ScrollView style={styles.container} contentContainerStyle={styles.scrollContent}>
+      <Text style={styles.header}>
+        {isConfirmMode ? 'Confirm PIN' : 'Create PIN for SpamWatch'}
+      </Text>
       <Image
         source={require('../assets/spamsplash.png')}
         style={styles.image}
       />
-      <TextInput
-        style={styles.input}
-        placeholder="Enter 4-digit pin"
-        placeholderTextColor="#999"
-        keyboardType="number-pad"
-        secureTextEntry
+      
+      {/* PIN Display */}
+      <View style={styles.pinContainer}>
+        <Text style={styles.pinLabel}>
+          {isConfirmMode ? 'Re-enter your 4-digit PIN' : 'Enter 4-digit PIN'}
+        </Text>
+        <View style={styles.pinDotsContainer}>
+          {Array.from({ length: 4 }, (_, index) => (
+            <View
+              key={index}
+              style={[
+                styles.pinDot,
+                index < (isConfirmMode ? confirm.length : pin.length) && styles.pinDotFilled,
+              ]}
+            />
+          ))}
+        </View>
+      </View>
+
+      {/* Scrambled Keypad */}
+      <ScrambledKeypad
+        onKeyPress={(key) => {
+          if (isConfirmMode) {
+            if (confirm.length < 4) {
+              setConfirm(prev => prev + key);
+            }
+          } else {
+            if (pin.length < 4) {
+              setPin(prev => prev + key);
+            }
+          }
+        }}
+        onBackspace={() => {
+          if (isConfirmMode) {
+            setConfirm(prev => prev.slice(0, -1));
+          } else {
+            setPin(prev => prev.slice(0, -1));
+          }
+        }}
+        onClear={() => {
+          if (isConfirmMode) {
+            setConfirm('');
+          } else {
+            setPin('');
+          }
+        }}
+        showClearButton={true}
         maxLength={4}
-        value={pin}
-        onChangeText={setPin}
+        currentValue={isConfirmMode ? confirm : pin}
+        buttonColor="#fff"
+        textColor="#2d3748"
+        backgroundColor="#f7fafc"
+        borderColor="#e2e8f0"
+        enableVibration={false}
       />
-      <TextInput
-        style={styles.input}
-        placeholder="Confirm PIN"
-         placeholderTextColor="#999"
-        keyboardType="number-pad"
-        secureTextEntry
-        maxLength={4}
-        value={confirm}
-        onChangeText={setConfirm}
-      />
+
       <TouchableOpacity
         style={[
           styles.button,
-          { backgroundColor: pin.length === 4 && pin === confirm ? '#003366' : '#ccc' },
+          { backgroundColor: (isConfirmMode ? confirm.length === 4 : pin.length === 4) ? '#003366' : '#ccc' },
         ]}
-        onPress={handleSetPin}
-        disabled={pin.length !== 4 || pin !== confirm}
+        onPress={() => {
+          if (!isConfirmMode) {
+            if (pin.length === 4) {
+              setIsConfirmMode(true);
+            }
+          } else {
+            handleSetPin();
+          }
+        }}
+        disabled={isConfirmMode ? confirm.length !== 4 : pin.length !== 4}
       >
-        <Text style={styles.buttonText}>Set PIN</Text>
+        <Text style={styles.buttonText}>
+          {isConfirmMode ? 'Set PIN' : 'Continue'}
+        </Text>
       </TouchableOpacity>
-    </View>
+
+      {isConfirmMode && (
+        <TouchableOpacity
+          style={styles.backButton}
+          onPress={() => {
+            setIsConfirmMode(false);
+            setConfirm('');
+          }}
+        >
+          <Text style={styles.backButtonText}>Back</Text>
+        </TouchableOpacity>
+      )}
+    </ScrollView>
      </SafeAreaView>
   );
 };
@@ -100,6 +162,7 @@ const SetPinScreen: React.FC<Props> = ({ navigation }) => {
 const styles = StyleSheet.create({
     safe:{flex: 1, backgroundColor: '#fff'},
   container: { flex: 1, backgroundColor: '#fff' },
+  scrollContent: { paddingBottom: 20 },
   header: {
     marginTop: 60,
     textAlign: 'center',
@@ -107,14 +170,35 @@ const styles = StyleSheet.create({
     fontWeight: '600',
   },
   image: { width: 180, height: 180, alignSelf: 'center', marginVertical: 20 },
-  input: {
-    marginHorizontal: 20,
-    borderWidth: 1,
-    borderColor: '#ccc',
-    borderRadius: 8,
-    padding: 10,
-    marginVertical: 10,
-    color: '#000',
+  pinContainer: {
+    alignItems: 'center',
+    marginVertical: 20,
+    paddingHorizontal: 20,
+  },
+  pinLabel: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: '#4a5568',
+    marginBottom: 20,
+    textAlign: 'center',
+  },
+  pinDotsContainer: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    gap: 12,
+    marginBottom: 10,
+  },
+  pinDot: {
+    width: 14,
+    height: 14,
+    borderRadius: 7,
+    borderWidth: 2,
+    borderColor: '#cbd5e0',
+    backgroundColor: 'transparent',
+  },
+  pinDotFilled: {
+    backgroundColor: '#003366',
+    borderColor: '#003366',
   },
   button: {
     padding: 15,
@@ -122,7 +206,17 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     alignItems: 'center',
   },
+  backButton: {
+    backgroundColor: 'transparent',
+    padding: 10,
+    margin: 20,
+    borderRadius: 8,
+    alignItems: 'center',
+    borderWidth: 1,
+    borderColor: '#ccc',
+  },
   buttonText: { color: '#fff', fontSize: 16 },
+  backButtonText: { color: '#666', fontSize: 16 },
 });
 
 export default SetPinScreen;
