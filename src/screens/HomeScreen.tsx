@@ -86,11 +86,7 @@ const HomeScreen: React.FC = () => {
 
   return (
     <SafeAreaView style={styles.safe}>
-      <StatusBar
-        barStyle="dark-content"
-        backgroundColor="#171819ff"
-        translucent={false}
-      />
+  <StatusBar barStyle="dark-content" backgroundColor="#667eea" />
       <ScrollView
         style={styles.container}
         contentContainerStyle={{ alignItems: 'center', paddingBottom: 40 }}

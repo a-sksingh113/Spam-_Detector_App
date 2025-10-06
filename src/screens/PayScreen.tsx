@@ -11,11 +11,15 @@ import {
   Modal,
   ActivityIndicator,
   ScrollView,
+  Dimensions,
 } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Picker } from '@react-native-picker/picker';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import Ionicons from 'react-native-vector-icons/Ionicons';
 import ScrambledKeypad from '../components/ScrambledKeypad';
+
+const { width, height } = Dimensions.get('window');
 
 const genderMap: { [key: string]: number } = { female: 1, male: 2, Other: 3 };
 
@@ -114,8 +118,42 @@ const PayScreen = () => {
   const [showFraudModal, setShowFraudModal] = useState(false);
   const [countdown, setCountdown] = useState(10);
   const [fraudTimer, setFraudTimer] = useState<NodeJS.Timeout | null>(null);
+  const [balance, setBalance] = useState<number | null>(null);
+  const [balanceLoading, setBalanceLoading] = useState(true);
 
   const statusMessages = ['Processing your payment...'];
+
+  // Fetch user balance
+  const fetchBalance = async () => {
+    try {
+      setBalanceLoading(true);
+      const userId = await AsyncStorage.getItem('userId');
+      if (!userId) {
+        setBalanceLoading(false);
+        return;
+      }
+
+      const response = await fetch(
+        'https://api.ucohakethon.pixbit.me/api/tranction/check-balance',
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ userId }),
+        }
+      );
+
+      const data = await response.json();
+      if (data.success !== false && data.balance !== undefined) {
+        setBalance(data.balance);
+      }
+    } catch (error) {
+      console.error('Error fetching balance:', error);
+    } finally {
+      setBalanceLoading(false);
+    }
+  };
 
   useEffect(() => {
     let interval: NodeJS.Timeout;
@@ -128,6 +166,10 @@ const PayScreen = () => {
 
     return () => clearInterval(interval);
   }, [loading]);
+
+  useEffect(() => {
+    fetchBalance();
+  }, []);
 
   const handlePayment = async () => {
     try {
@@ -235,6 +277,8 @@ const PayScreen = () => {
         Alert.alert(' Success', 'Payment Successful');
         setAmount('');
         setMerchantId('');
+        // Refresh balance after successful payment
+        fetchBalance();
       } else if (message === 'Transaction flagged by AI model.') {
         Alert.alert(
           '🚫 Blocked by Bank',
@@ -273,6 +317,15 @@ const PayScreen = () => {
       return;
     }
 
+    // Check if balance is sufficient
+    if (balance !== null && parseFloat(amount) > balance) {
+      Alert.alert(
+        'Insufficient Balance', 
+        `Your current balance is ₹${balance.toLocaleString()}. Please enter a smaller amount or recharge your account.`
+      );
+      return;
+    }
+
     try {
       const id = await AsyncStorage.getItem('userId');
       console.log('User ID from AsyncStorage:', id);
@@ -299,44 +352,180 @@ const PayScreen = () => {
   };
 
   return (
-    <SafeAreaView style={styles.safe}>
-      <StatusBar barStyle="dark-content" backgroundColor="#003366" />
-      <View style={styles.container}>
-        <Text style={styles.title}>Make a Payment</Text>
-
-        <TextInput
-          style={styles.input}
-          placeholder="Enter Amount in Rs"
-           placeholderTextColor="#999"
-          value={amount}
-          keyboardType="numeric"
-          onChangeText={setAmount}
-        />
-
-        <TextInput
-          style={styles.input}
-          placeholder="Enter Merchant ID"
-           placeholderTextColor="#999"
-          value={merchantId}
-          onChangeText={setMerchantId}
-        />
-
-        <Text style={styles.label}>Select Category</Text>
-        <View style={styles.pickerContainer}>
-          <Picker
-            selectedValue={category}
-            onValueChange={value => setCategory(value)}
-          >
-            {Object.keys(categoryMap).map(key => (
-              <Picker.Item key={key} label={key} value={key} color="#999"/>
-            ))}
-          </Picker>
+    <SafeAreaView style={styles.container}>
+      <StatusBar barStyle="dark-content" backgroundColor="#667eea" />
+      
+      {/* Header */}
+      <View style={styles.header}>
+        <View style={styles.headerContent}>
+          <Ionicons name="card-outline" size={28} color="#fff" />
+          <Text style={styles.headerTitle}>Make Payment</Text>
         </View>
-
-        <TouchableOpacity style={styles.button} onPress={handlePay}>
-          <Text style={styles.buttonText}>Pay</Text>
+        <TouchableOpacity style={styles.helpButton}>
+          <Ionicons name="help-circle-outline" size={24} color="#fff" />
         </TouchableOpacity>
       </View>
+
+      <ScrollView style={styles.scrollContainer} showsVerticalScrollIndicator={false}>
+        {/* Balance Card */}
+        <View style={styles.balanceCard}>
+          <View style={styles.balanceHeader}>
+            <Ionicons name="wallet-outline" size={24} color="#667eea" />
+            <Text style={styles.balanceLabel}>Available Balance</Text>
+            <TouchableOpacity onPress={fetchBalance} style={styles.refreshBalanceButton}>
+              <Ionicons name="refresh" size={16} color="#667eea" />
+            </TouchableOpacity>
+          </View>
+          {balanceLoading ? (
+            <View style={styles.balanceLoadingContainer}>
+              <ActivityIndicator size="small" color="#667eea" />
+              <Text style={styles.balanceLoadingText}>Loading balance...</Text>
+            </View>
+          ) : (
+            <>
+              <Text style={styles.balanceAmount}>
+                ₹{balance !== null ? balance.toLocaleString() : '0.00'}
+              </Text>
+              <Text style={styles.balanceSubtext}>**** 4829</Text>
+            </>
+          )}
+        </View>
+
+        {/* Payment Form */}
+        <View style={styles.formCard}>
+          <Text style={styles.sectionTitle}>Payment Details</Text>
+          
+          {/* Amount Input */}
+          <View style={styles.inputContainer}>
+            <View style={styles.inputWrapper}>
+              <Ionicons name="cash-outline" size={20} color="#667eea" style={styles.inputIcon} />
+              <TextInput
+                style={styles.input}
+                placeholder="Enter Amount"
+                placeholderTextColor="#94a3b8"
+                value={amount}
+                keyboardType="numeric"
+                onChangeText={setAmount}
+              />
+              <Text style={styles.currencyLabel}>INR</Text>
+            </View>
+          </View>
+
+          {/* Merchant ID Input */}
+          <View style={styles.inputContainer}>
+            <View style={styles.inputWrapper}>
+              <Ionicons name="storefront-outline" size={20} color="#667eea" style={styles.inputIcon} />
+              <TextInput
+                style={styles.input}
+                placeholder="Merchant ID"
+                placeholderTextColor="#94a3b8"
+                value={merchantId}
+                onChangeText={setMerchantId}
+              />
+            </View>
+          </View>
+
+          {/* Category Picker */}
+          <View style={styles.inputContainer}>
+            <Text style={styles.inputLabel}>
+              <Ionicons name="apps-outline" size={16} color="#64748b" /> Category
+            </Text>
+            <View style={styles.pickerWrapper}>
+              <Picker
+                selectedValue={category}
+                onValueChange={value => setCategory(value)}
+                style={styles.picker}
+              >
+                {Object.keys(categoryMap).map(key => (
+                  <Picker.Item 
+                    key={key} 
+                    label={key.replace('es_', '').replace(/([A-Z])/g, ' $1').replace(/^./, str => str.toUpperCase())} 
+                    value={key} 
+                    color="#1e293b"
+                  />
+                ))}
+              </Picker>
+            </View>
+          </View>
+        </View>
+
+        {/* Quick Amount Selection */}
+        <View style={styles.quickAmountCard}>
+          <Text style={styles.sectionTitle}>Quick Select</Text>
+          <View style={styles.quickAmountGrid}>
+            {['100', '500', '1000', '2000', '5000', '10000'].map((quickAmount) => (
+              <TouchableOpacity
+                key={quickAmount}
+                style={[
+                  styles.quickAmountButton,
+                  amount === quickAmount && styles.quickAmountButtonActive
+                ]}
+                onPress={() => setAmount(quickAmount)}
+              >
+                <Text style={[
+                  styles.quickAmountText,
+                  amount === quickAmount && styles.quickAmountTextActive
+                ]}>
+                  ₹{quickAmount}
+                </Text>
+              </TouchableOpacity>
+            ))}
+          </View>
+        </View>
+
+        {/* Payment Summary */}
+        {amount && merchantId && (
+          <View style={styles.summaryCard}>
+            <Text style={styles.sectionTitle}>Payment Summary</Text>
+            <View style={styles.summaryRow}>
+              <Text style={styles.summaryLabel}>Amount</Text>
+              <Text style={styles.summaryValue}>₹{amount}</Text>
+            </View>
+            <View style={styles.summaryRow}>
+              <Text style={styles.summaryLabel}>Processing Fee</Text>
+              <Text style={styles.summaryValue}>₹0</Text>
+            </View>
+            {balance !== null && (
+              <View style={styles.summaryRow}>
+                <Text style={styles.summaryLabel}>Remaining Balance</Text>
+                <Text style={[
+                  styles.summaryValue,
+                  parseFloat(amount || '0') > balance ? styles.insufficientBalance : styles.sufficientBalance
+                ]}>
+                  ₹{(balance - parseFloat(amount || '0')).toLocaleString()}
+                </Text>
+              </View>
+            )}
+            <View style={styles.summaryDivider} />
+            <View style={styles.summaryRow}>
+              <Text style={styles.summaryLabelTotal}>Total Amount</Text>
+              <Text style={styles.summaryValueTotal}>₹{amount}</Text>
+            </View>
+          </View>
+        )}
+
+        {/* Pay Button */}
+        <View style={styles.payButtonContainer}>
+          <TouchableOpacity 
+            style={[
+              styles.payButton,
+              (!amount || !merchantId || (balance !== null && parseFloat(amount || '0') > balance)) && styles.payButtonDisabled
+            ]} 
+            onPress={handlePay}
+            disabled={!amount || !merchantId || (balance !== null && parseFloat(amount || '0') > balance)}
+          >
+            <Ionicons 
+              name={balance !== null && parseFloat(amount || '0') > balance ? "alert-circle" : "shield-checkmark"} 
+              size={20} 
+              color="#fff" 
+              style={styles.payButtonIcon} 
+            />
+            <Text style={styles.payButtonText}>
+              {balance !== null && parseFloat(amount || '0') > balance ? "Insufficient Balance" : "Pay Securely"}
+            </Text>
+          </TouchableOpacity>
+        </View>
+      </ScrollView>
 
       {/*  PIN Modal with Scrambled Keypad */}
       <Modal visible={showPinModal} transparent animationType="slide">
@@ -474,115 +663,297 @@ const PayScreen = () => {
 export default PayScreen;
 
 const styles = StyleSheet.create({
-  modalBackground1: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: 'rgba(0,0,0,0.5)',
-  },
-  modalBox1: {
-    width: '85%',
-    backgroundColor: 'white',
-    borderRadius: 10,
-    padding: 20,
-    alignItems: 'center',
-  },
-  modalTitle1: {
-    fontSize: 20,
-    fontWeight: 'bold',
-    marginBottom: 10,
-    color: 'red',
-  },
-  modalText1: {
-    fontSize: 16,
-    textAlign: 'center',
-    marginBottom: 10,
-  },
-  modalCountdown1: {
-    fontSize: 16,
-    fontWeight: 'bold',
-    color: 'orange',
-    marginBottom: 20,
-  },
-  modalButtons1: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    width: '100%',
-  },
-  button1: {
-    flex: 1,
-    padding: 10,
-    marginHorizontal: 5,
-    borderRadius: 5,
-    alignItems: 'center',
-  },
-  cancelButton1: {
-    backgroundColor: '#ccc',
-  },
-  proceedButton1: {
-    backgroundColor: '#ff4d4d',
-  },
-  buttonText1: {
-    color: 'white',
-    fontWeight: 'bold',
-  },
-  closeButton: {
-    position: 'absolute',
-    top: 10,
-    right: 10,
-    padding: 10,
-    zIndex: 1,
-  },
-
-  safe: {
-    flex: 1,
-    backgroundColor: '#fff',
-    marginTop: 31,
-    marginBottom: 43,
-  },
+  // Main Container
   container: {
     flex: 1,
-    padding: 20,
-    backgroundColor: '#fff',
+    backgroundColor: '#f8fafc',
   },
-  title: {
-    fontSize: 22,
-    fontWeight: 'bold',
-    marginBottom: 20,
-    alignSelf: 'center',
+  
+  // Header Styles
+  header: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingHorizontal: 20,
+    paddingVertical: 16,
+    backgroundColor: '#667eea',
+    elevation: 4,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
   },
-  input: {
-    width: 354,
-    height: 50,
-    borderColor: '#aaa',
-    borderWidth: 1,
-    borderRadius: 8,
-    paddingHorizontal: 15,
-    marginVertical: 10,
-     color: '#000',
-  },
-  label: {
-    marginTop: 15,
-    fontSize: 16,
-  },
-  pickerContainer: {
-    borderWidth: 1,
-    borderColor: '#aaa',
-    borderRadius: 8,
-    marginTop: 5,
-  },
-  button: {
-    backgroundColor: '#000203ff',
-    width: 100,
-    paddingVertical: 14,
-    borderRadius: 50,
-    marginTop: 20,
+  headerContent: {
+    flexDirection: 'row',
     alignItems: 'center',
   },
-  buttonText: {
-    color: '#fefefeff',
-    fontSize: 16,
+  headerTitle: {
+    fontSize: 20,
+    fontWeight: '600',
+    color: '#fff',
+    marginLeft: 12,
   },
+  helpButton: {
+    padding: 8,
+    borderRadius: 20,
+    backgroundColor: 'rgba(255, 255, 255, 0.2)',
+  },
+  
+  // Scroll Container
+  scrollContainer: {
+    flex: 1,
+    paddingHorizontal: 16,
+  },
+  
+  // Balance Card
+  balanceCard: {
+    backgroundColor: '#fff',
+    borderRadius: 16,
+    padding: 20,
+    marginTop: 16,
+    elevation: 2,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.1,
+    shadowRadius: 2,
+  },
+  balanceHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 12,
+  },
+  balanceLabel: {
+    fontSize: 14,
+    color: '#64748b',
+    marginLeft: 8,
+    fontWeight: '500',
+    flex: 1,
+  },
+  refreshBalanceButton: {
+    padding: 4,
+    borderRadius: 12,
+    backgroundColor: '#f1f5f9',
+  },
+  balanceAmount: {
+    fontSize: 28,
+    fontWeight: '700',
+    color: '#1e293b',
+    marginBottom: 4,
+  },
+  balanceSubtext: {
+    fontSize: 12,
+    color: '#94a3b8',
+    fontWeight: '500',
+  },
+  balanceLoadingContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingVertical: 16,
+  },
+  balanceLoadingText: {
+    fontSize: 14,
+    color: '#64748b',
+    marginLeft: 8,
+    fontWeight: '500',
+  },
+  
+  // Form Card
+  formCard: {
+    backgroundColor: '#fff',
+    borderRadius: 16,
+    padding: 20,
+    marginTop: 16,
+    elevation: 2,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.1,
+    shadowRadius: 2,
+  },
+  sectionTitle: {
+    fontSize: 18,
+    fontWeight: '600',
+    color: '#1e293b',
+    marginBottom: 16,
+  },
+  
+  // Input Styles
+  inputContainer: {
+    marginBottom: 16,
+  },
+  inputLabel: {
+    fontSize: 14,
+    fontWeight: '500',
+    color: '#64748b',
+    marginBottom: 8,
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  inputWrapper: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    borderWidth: 1,
+    borderColor: '#e2e8f0',
+    borderRadius: 12,
+    backgroundColor: '#fff',
+    paddingHorizontal: 16,
+    height: 56,
+  },
+  inputIcon: {
+    marginRight: 12,
+  },
+  input: {
+    flex: 1,
+    fontSize: 16,
+    color: '#1e293b',
+    fontWeight: '500',
+  },
+  currencyLabel: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: '#667eea',
+    backgroundColor: '#f1f5f9',
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: 6,
+  },
+  
+  // Picker Styles
+  pickerWrapper: {
+    borderWidth: 1,
+    borderColor: '#e2e8f0',
+    borderRadius: 12,
+    backgroundColor: '#fff',
+    overflow: 'hidden',
+  },
+  picker: {
+    height: 56,
+    color: '#1e293b',
+  },
+  
+  // Quick Amount Selection
+  quickAmountCard: {
+    backgroundColor: '#fff',
+    borderRadius: 16,
+    padding: 20,
+    marginTop: 16,
+    elevation: 2,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.1,
+    shadowRadius: 2,
+  },
+  quickAmountGrid: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    justifyContent: 'space-between',
+  },
+  quickAmountButton: {
+    width: (width - 80) / 3,
+    height: 48,
+    backgroundColor: '#f8fafc',
+    borderRadius: 12,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginBottom: 12,
+    borderWidth: 1,
+    borderColor: '#e2e8f0',
+  },
+  quickAmountButtonActive: {
+    backgroundColor: '#667eea',
+    borderColor: '#667eea',
+  },
+  quickAmountText: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: '#64748b',
+  },
+  quickAmountTextActive: {
+    color: '#fff',
+  },
+  
+  // Summary Card
+  summaryCard: {
+    backgroundColor: '#fff',
+    borderRadius: 16,
+    padding: 20,
+    marginTop: 16,
+    elevation: 2,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.1,
+    shadowRadius: 2,
+  },
+  summaryRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 12,
+  },
+  summaryLabel: {
+    fontSize: 14,
+    color: '#64748b',
+    fontWeight: '500',
+  },
+  summaryValue: {
+    fontSize: 14,
+    color: '#1e293b',
+    fontWeight: '600',
+  },
+  insufficientBalance: {
+    color: '#ef4444',
+  },
+  sufficientBalance: {
+    color: '#10b981',
+  },
+  summaryLabelTotal: {
+    fontSize: 16,
+    color: '#1e293b',
+    fontWeight: '600',
+  },
+  summaryValueTotal: {
+    fontSize: 18,
+    color: '#667eea',
+    fontWeight: '700',
+  },
+  summaryDivider: {
+    height: 1,
+    backgroundColor: '#e2e8f0',
+    marginVertical: 8,
+  },
+  
+  // Pay Button
+  payButtonContainer: {
+    paddingVertical: 20,
+    paddingBottom: 30,
+  },
+  payButton: {
+    backgroundColor: '#667eea',
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 16,
+    borderRadius: 16,
+    elevation: 3,
+    shadowColor: '#667eea',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.3,
+    shadowRadius: 4,
+  },
+  payButtonDisabled: {
+    backgroundColor: '#94a3b8',
+    elevation: 0,
+    shadowOpacity: 0,
+  },
+  payButtonIcon: {
+    marginRight: 8,
+  },
+  payButtonText: {
+    fontSize: 18,
+    fontWeight: '600',
+    color: '#fff',
+  },
+  
+  // Modal Styles
   modalOverlay: {
     flex: 1,
     justifyContent: 'center',
@@ -590,21 +961,45 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(0,0,0,0.5)',
   },
   modalBox: {
-    width: 370,
+    width: '85%',
+    maxWidth: 350,
     padding: 30,
     backgroundColor: '#fff',
-    borderRadius: 10,
+    borderRadius: 20,
     alignItems: 'center',
+    elevation: 5,
   },
   modalBoxLarge: {
     width: '90%',
     maxWidth: 400,
     padding: 20,
     backgroundColor: '#fff',
-    borderRadius: 16,
+    borderRadius: 20,
     alignItems: 'center',
     maxHeight: '80%',
+    elevation: 5,
   },
+  closeButton: {
+    position: 'absolute',
+    top: 15,
+    right: 15,
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    backgroundColor: '#f1f5f9',
+    justifyContent: 'center',
+    alignItems: 'center',
+    zIndex: 1,
+  },
+  title: {
+    fontSize: 20,
+    fontWeight: '600',
+    color: '#1e293b',
+    marginBottom: 20,
+    textAlign: 'center',
+  },
+  
+  // PIN Styles
   pinContainer: {
     alignItems: 'center',
     marginVertical: 15,
@@ -612,35 +1007,118 @@ const styles = StyleSheet.create({
   },
   pinLabel: {
     fontSize: 14,
-    fontWeight: '600',
-    color: '#4a5568',
+    fontWeight: '500',
+    color: '#64748b',
     marginBottom: 15,
     textAlign: 'center',
+    lineHeight: 20,
   },
   pinDotsContainer: {
     flexDirection: 'row',
     justifyContent: 'center',
-    gap: 10,
-    marginBottom: 10,
+    gap: 12,
+    marginBottom: 15,
   },
   pinDot: {
-    width: 12,
-    height: 12,
-    borderRadius: 6,
+    width: 16,
+    height: 16,
+    borderRadius: 8,
     borderWidth: 2,
     borderColor: '#cbd5e0',
     backgroundColor: 'transparent',
   },
   pinDotFilled: {
-    backgroundColor: '#2196F3',
-    borderColor: '#2196F3',
+    backgroundColor: '#667eea',
+    borderColor: '#667eea',
+  },
+  
+  // Button Styles
+  button: {
+    backgroundColor: '#667eea',
+    paddingVertical: 14,
+    paddingHorizontal: 32,
+    borderRadius: 12,
+    marginTop: 15,
+    minWidth: 120,
+    alignItems: 'center',
+  },
+  buttonText: {
+    color: '#fff',
+    fontSize: 16,
+    fontWeight: '600',
   },
   disabled: {
-    opacity: 0.6,
+    opacity: 0.5,
   },
+  
+  // Loading
   loadingText: {
     marginTop: 15,
     fontSize: 16,
     textAlign: 'center',
+    color: '#64748b',
+    fontWeight: '500',
+  },
+  
+  // Fraud Modal Styles
+  modalBackground1: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: 'rgba(0,0,0,0.6)',
+  },
+  modalBox1: {
+    width: '88%',
+    maxWidth: 350,
+    backgroundColor: '#fff',
+    borderRadius: 20,
+    padding: 24,
+    alignItems: 'center',
+    elevation: 5,
+  },
+  modalTitle1: {
+    fontSize: 22,
+    fontWeight: '700',
+    marginBottom: 12,
+    color: '#ef4444',
+    textAlign: 'center',
+  },
+  modalText1: {
+    fontSize: 16,
+    textAlign: 'center',
+    marginBottom: 16,
+    color: '#64748b',
+    lineHeight: 22,
+  },
+  modalCountdown1: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: '#f59e0b',
+    marginBottom: 24,
+    textAlign: 'center',
+  },
+  modalButtons1: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    width: '100%',
+    gap: 12,
+  },
+  button1: {
+    flex: 1,
+    paddingVertical: 12,
+    borderRadius: 12,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  cancelButton1: {
+    backgroundColor: '#94a3b8',
+  },
+  proceedButton1: {
+    backgroundColor: '#ef4444',
+  },
+  buttonText1: {
+    color: '#fff',
+    fontWeight: '600',
+    fontSize: 16,
   },
 });
