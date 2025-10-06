@@ -32,7 +32,7 @@ const [verifying, setVerifying] = useState(false);
     try {
        setVerifying(true);
       const response = await fetch(
-        'https://spam-detector-app-backend.vercel.app/api/user/verify-otp',
+        'https://api.ucohakethon.pixbit.me/api/user/verify-otp',
         {
           method: 'POST',
           headers: {
@@ -87,6 +87,7 @@ const [verifying, setVerifying] = useState(false);
         <TextInput
           style={styles.input}
           placeholder="Enter OTP"
+           placeholderTextColor="#999"
           keyboardType="number-pad"
           value={otp}
           onChangeText={setOtp}

@@ -60,11 +60,12 @@ const LoginScreen: React.FC<Props> = ({ navigation }) => {
             translucent={false}
           />
     <View style={styles.container}>
-      <Text style={styles.header}>Welcome to Spam Detector, Please Login</Text>
+      <Text style={styles.header}>Welcome to DigiRakshak, Please Login</Text>
       <Image source={require('../assets/spamsplash.png')} style={styles.image} />
       <TextInput
         style={styles.input}
         placeholder="Enter your 4-digit pin"
+         placeholderTextColor="#999"
         keyboardType="number-pad"
         secureTextEntry
         maxLength={4}
@@ -102,6 +103,7 @@ const styles = StyleSheet.create({
     borderColor: '#ccc',
     borderRadius: 8,
     padding: 10,
+     color: '#000',
   },
   row: { flexDirection: 'row', justifyContent: 'space-between', margin: 20 },
   link: { justifyContent: 'center' },

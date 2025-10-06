@@ -10,9 +10,22 @@
     <uses-permission android:name="android.permission.RECEIVE_MMS" />
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.USE_BIOMETRIC" />
-<uses-permission android:name="android.permission.USE_FINGERPRINT" />
+    <uses-permission android:name="android.permission.USE_FINGERPRINT" />
+    <uses-permission android:name="android.permission.RECORD_AUDIO" />
+    <uses-permission android:name="android.permission.MODIFY_AUDIO_SETTINGS" />
 
 <uses-feature android:name="android.hardware.fingerprint" android:required="false" />
+
+
+    <queries>
+        <!-- Remote control / suspicious apps -->
+        <package android:name="com.anydesk.anydeskandroid" />
+        <package android:name="com.teamviewer.quicksupport.market" />
+        <package android:name="com.rsupport.mvagent" />
+        <package android:name="com.remotepc" />
+        <package android:name="com.logmein.ignition" />
+        <!-- Add any other suspicious apps you want to detect -->
+    </queries>
 
 
     <application

@@ -31,7 +31,7 @@ const SetPinScreen: React.FC = () => {
     }
 
     try {
-      const response = await fetch('https://spam-detector-app-backend.onrender.com/api/user/login', {
+      const response = await fetch('https://api.ucohakethon.pixbit.me/api/user/login', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ phone }),
@@ -71,6 +71,7 @@ const SetPinScreen: React.FC = () => {
 
         <TextInput
           placeholder="Enter phone number"
+           placeholderTextColor="#999"
           style={styles.input}
           value={phone}
           onChangeText={setPhone}
@@ -78,6 +79,7 @@ const SetPinScreen: React.FC = () => {
         />
         <TextInput
           placeholder="Enter new PIN"
+           placeholderTextColor="#999"
           style={styles.input}
           secureTextEntry
           keyboardType="numeric"
@@ -86,6 +88,7 @@ const SetPinScreen: React.FC = () => {
         />
         <TextInput
           placeholder="Confirm new PIN"
+           placeholderTextColor="#999"
           style={styles.input}
           secureTextEntry
           keyboardType="numeric"
@@ -121,6 +124,7 @@ const styles = StyleSheet.create({
     padding: 12,
     marginBottom: 20,
     borderRadius: 8,
+     color: '#000',
   },
   button: {
     backgroundColor: '#003366',

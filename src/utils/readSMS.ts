@@ -8,7 +8,7 @@ export const readAndCheckSMS = async () => {
   );
   if (granted === PermissionsAndroid.RESULTS.GRANTED) {
     SmsAndroid.list(
-      JSON.stringify({ box: 'inbox', maxCount: 30 }),
+      JSON.stringify({ box: 'inbox', maxCount: 40 }),
       (fail:string) => console.log('Failed:', fail),
       async (count: number, smsList: string) => {
         const messages = JSON.parse(smsList);

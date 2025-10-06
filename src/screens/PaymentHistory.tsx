@@ -36,7 +36,7 @@ const PaymentHistory = () => {
       }
 
       const response = await axios.post(
-        'https://spam-detector-app-backend.vercel.app/api/tranction/transactions-history',
+        'https://api.ucohakethon.pixbit.me/api/tranction/transactions-history',
         { userId }
       );
 

@@ -25,7 +25,7 @@ const RegisterScreen: React.FC<Props> = ({ navigation }) => {
   const [phone, setPhone] = useState('');
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
-  const [gender, setGender] = useState('male');
+  const [gender, setGender] = useState('');
   const [age, setAge] = useState('');
   const [customerID, setCustomerID] = useState('');
   const [merchantID, setMerchantID] = useState('');
@@ -54,7 +54,7 @@ const RegisterScreen: React.FC<Props> = ({ navigation }) => {
     try {
       setLoading(true);
       const response = await fetch(
-        'https://spam-detector-app-backend.vercel.app/api/user/register',
+        'https://api.ucohakethon.pixbit.me/api/user/register',
         {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
@@ -110,6 +110,7 @@ const RegisterScreen: React.FC<Props> = ({ navigation }) => {
             <TextInput
               style={styles.input}
               placeholder="Mobile Number"
+               placeholderTextColor="#999"
               keyboardType="phone-pad"
               value={phone}
               onChangeText={setPhone}
@@ -117,6 +118,7 @@ const RegisterScreen: React.FC<Props> = ({ navigation }) => {
             <TextInput
               style={styles.input}
               placeholder="Name"
+               placeholderTextColor="#999"
               keyboardType="default"
               value={name}
               onChangeText={setName}
@@ -124,6 +126,7 @@ const RegisterScreen: React.FC<Props> = ({ navigation }) => {
             <TextInput
               style={styles.input}
               placeholder="Email"
+               placeholderTextColor="#999"
               keyboardType="email-address"
               autoCapitalize="none"
               value={email}
@@ -132,7 +135,8 @@ const RegisterScreen: React.FC<Props> = ({ navigation }) => {
 
             <TextInput
               style={styles.input}
-              placeholder="Gender-male or female"
+              placeholder="male or female"
+               placeholderTextColor="#999"
               keyboardType="default"
               value={gender}
               onChangeText={setGender}
@@ -140,6 +144,7 @@ const RegisterScreen: React.FC<Props> = ({ navigation }) => {
             <TextInput
               style={styles.input}
               placeholder="Age"
+               placeholderTextColor="#999"
               keyboardType="number-pad"
               value={age}
               onChangeText={setAge}
@@ -147,6 +152,7 @@ const RegisterScreen: React.FC<Props> = ({ navigation }) => {
             <TextInput
               style={styles.input}
               placeholder="Customer ID"
+               placeholderTextColor="#999"
               keyboardType="default"
               value={customerID}
               onChangeText={setCustomerID}
@@ -154,6 +160,7 @@ const RegisterScreen: React.FC<Props> = ({ navigation }) => {
             <TextInput
               style={styles.input}
               placeholder="Merchant ID"
+               placeholderTextColor="#999"
               keyboardType="default"
               value={merchantID}
               onChangeText={setMerchantID}

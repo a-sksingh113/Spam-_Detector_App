@@ -35,7 +35,7 @@ const LoginWithPhoneScreen: React.FC<Props> = ({ navigation }) => {
     try {
       setLoggingIn(true);
       const response = await fetch(
-        'https://spam-detector-app-backend.vercel.app/api/user/login',
+        'https://api.ucohakethon.pixbit.me/api/user/login',
         {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
@@ -93,6 +93,7 @@ const LoginWithPhoneScreen: React.FC<Props> = ({ navigation }) => {
             <TextInput
               style={styles.input}
               placeholder="Enter your mobile number"
+               placeholderTextColor="#999"
               keyboardType="phone-pad"
               value={phone}
               onChangeText={setPhone}
@@ -133,6 +134,7 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     padding: 12,
     marginBottom: 20,
+     color: '#000',
   },
   button: {
     backgroundColor: '#003366',

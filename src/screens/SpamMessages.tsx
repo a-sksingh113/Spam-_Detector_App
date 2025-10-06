@@ -145,6 +145,7 @@ const SpamMessages: React.FC = () => {
           <TextInput
             ref={inputRef}
             placeholder="Search spam..."
+             placeholderTextColor="#999"
             value={searchText}
             onChangeText={setSearchText}
             style={[styles.searchInput, { flex: 1, marginBottom: 0, marginTop: 4 }]}

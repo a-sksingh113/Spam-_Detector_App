@@ -54,7 +54,7 @@ const CheckMessageScreen = () => {
       setLoading(true);
       setResult(null);
 
-      const response = await fetch('https://model1.satishdev.me/predict1', {
+      const response = await fetch('https://model1.pixbit.me/predict1', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ text: message }),
@@ -115,6 +115,7 @@ const CheckMessageScreen = () => {
               <TextInput
                 style={styles.input}
                 placeholder="Paste your message here..."
+                 placeholderTextColor="#999"
                 multiline
                 numberOfLines={4}
                 value={message}

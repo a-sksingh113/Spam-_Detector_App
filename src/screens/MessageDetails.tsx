@@ -56,7 +56,7 @@ const checkLinkSpam = async (url: string) => {
 
   try {
     console.log('Sending POST request to backend...');
-    const response = await fetch('https://model4.satishdev.me/predict4', {
+    const response = await fetch('https://model4.pixbit.me/predict4', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ url }),

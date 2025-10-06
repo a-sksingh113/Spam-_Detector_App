@@ -48,7 +48,7 @@ const CheckBalance = () => {
         if (!userId) throw new Error('User ID not found');
 
         const response = await fetch(
-          'https://spam-detector-app-backend.vercel.app/api/tranction/check-balance',
+          'https://api.ucohakethon.pixbit.me/api/tranction/check-balance',
           {
             method: 'POST',
             headers: {

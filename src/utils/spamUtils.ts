@@ -9,7 +9,7 @@ export interface SmsMessage {
 
 export const checkSpamWithAPI = async (message: SmsMessage): Promise<void> => {
   try {
-    const response = await fetch('https://model1.satishdev.me/predict1', {
+    const response = await fetch('https://model1.pixbit.me/predict1', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ text: message.content }),

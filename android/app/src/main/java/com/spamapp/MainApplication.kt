@@ -9,6 +9,8 @@ import com.facebook.react.ReactPackage
 import com.facebook.react.defaults.DefaultReactHost.getDefaultReactHost
 import com.facebook.react.defaults.DefaultReactNativeHost
 import com.facebook.react.ReactNativeApplicationEntryPoint.loadReactNative
+import com.spamapp.AppCheckPackage
+
 
 // ✅ Import for SMS packages
 import com.centaurwarchief.smslistener.SmsListenerPackage
@@ -23,6 +25,8 @@ class MainApplication : Application(), ReactApplication {
           // ✅ Add SMS packages manually
           add(SmsListenerPackage())
           add(SmsPackage())
+
+          add(AppCheckPackage())
         }
 
       override fun getJSMainModuleName(): String = "index"

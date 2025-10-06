@@ -65,6 +65,7 @@ const SetPinScreen: React.FC<Props> = ({ navigation }) => {
       <TextInput
         style={styles.input}
         placeholder="Enter 4-digit pin"
+        placeholderTextColor="#999"
         keyboardType="number-pad"
         secureTextEntry
         maxLength={4}
@@ -74,6 +75,7 @@ const SetPinScreen: React.FC<Props> = ({ navigation }) => {
       <TextInput
         style={styles.input}
         placeholder="Confirm PIN"
+         placeholderTextColor="#999"
         keyboardType="number-pad"
         secureTextEntry
         maxLength={4}
@@ -112,6 +114,7 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     padding: 10,
     marginVertical: 10,
+    color: '#000',
   },
   button: {
     padding: 15,

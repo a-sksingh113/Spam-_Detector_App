@@ -172,7 +172,7 @@ const PayScreen = () => {
       };
 
       const aiResponse = await axios.post(
-        'https://model3.satishdev.me/predict3',
+        'https://model3.pixbit.me/predict3',
         { data },
       );
       if (!aiResponse || aiResponse.data.prediction === 1) {
@@ -221,7 +221,7 @@ const PayScreen = () => {
       console.log(' Initiating Payment with Body:', paymentBody);
 
       const paymentResponse = await axios.post(
-        'https://spam-detector-app-backend.vercel.app/api/tranction/pay',
+        'https://api.ucohakethon.pixbit.me/api/tranction/pay',
         paymentBody,
       );
 
@@ -305,6 +305,7 @@ const PayScreen = () => {
         <TextInput
           style={styles.input}
           placeholder="Enter Amount in Rs"
+           placeholderTextColor="#999"
           value={amount}
           keyboardType="numeric"
           onChangeText={setAmount}
@@ -313,6 +314,7 @@ const PayScreen = () => {
         <TextInput
           style={styles.input}
           placeholder="Enter Merchant ID"
+           placeholderTextColor="#999"
           value={merchantId}
           onChangeText={setMerchantId}
         />
@@ -324,7 +326,7 @@ const PayScreen = () => {
             onValueChange={value => setCategory(value)}
           >
             {Object.keys(categoryMap).map(key => (
-              <Picker.Item key={key} label={key} value={key} />
+              <Picker.Item key={key} label={key} value={key} color="#999"/>
             ))}
           </Picker>
         </View>
@@ -356,6 +358,7 @@ const PayScreen = () => {
               value={enteredPin}
               onChangeText={setEnteredPin}
               placeholder="Enter PIN"
+               placeholderTextColor="#999"
               keyboardType="numeric"
               secureTextEntry
               autoFocus
@@ -527,6 +530,7 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     paddingHorizontal: 15,
     marginVertical: 10,
+     color: '#000',
   },
   label: {
     marginTop: 15,

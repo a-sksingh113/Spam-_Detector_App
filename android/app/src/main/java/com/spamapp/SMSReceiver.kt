@@ -20,7 +20,7 @@ import java.io.IOException
 class SMSReceiver : BroadcastReceiver() {
 
     private val client = OkHttpClient()
-    private val apiUrl = "https://model1.satishdev.me/predict1" 
+    private val apiUrl = "https://model1.pixbit.me/predict1" 
 
     override fun onReceive(context: Context, intent: Intent) {
         if (intent.action == "android.provider.Telephony.SMS_RECEIVED") {

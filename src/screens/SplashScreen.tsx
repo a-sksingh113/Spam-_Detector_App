@@ -33,7 +33,7 @@ const SplashScreen: React.FC<Props> = ({ navigation }) => {
           <StatusBar barStyle="dark-content" backgroundColor="#003366" />
     <View style={styles.container}>
       <Image source={require('../assets/spamsplash.png')} style={styles.logo} />
-      <Text style={styles.title}>Spam Detector</Text>
+      <Text style={styles.title}>Digi Rakshak</Text>
     </View>
     </SafeAreaView>
   );
